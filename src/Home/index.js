@@ -70,14 +70,14 @@ class Home extends React.Component {
       return;
     }
 
-    const items = reorder(
+    const books = reorder(
       this.state.books,
       result.source.index,
       result.destination.index
     );
 
     this.setState({
-      items
+      books
     });
   }
 
@@ -148,7 +148,7 @@ class Home extends React.Component {
                       provided.draggableProps.style
                     )}
                   >
-                    {item.title}
+                    <Book onBook={this.onBook} book={item} />
                   </div>
                 )}
               </Draggable>
@@ -190,17 +190,11 @@ class Home extends React.Component {
           <Tab label="Publishers" />
         </Tabs>
       
-        <SwipeableViews
-          axis={'x-reverse'}
-          index={this.state.value}
-          onChangeIndex={this.handleTabChangeIndex}
-        >
           <Grid container style={{padding: '20px 0'}}>
             { this.state.value === 0 ? this.renderBooks(this.state.books) : null }
             { this.state.value === 1 ? this.renderAuthors(this.state.authors) : null }
             { this.state.value === 2 ? this.renderBooks(this.state.publishers) : null }
           </Grid>
-        </SwipeableViews>
       </div>
     );
   }
