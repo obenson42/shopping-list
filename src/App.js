@@ -1,25 +1,58 @@
-import logo from './logo.svg';
-import './App.css';
+import React, { useState } from 'react';
+import { Router } from 'react-router-dom'
+import { AppContext } from "./contextLib";
+import Main from './Main'
+import { createBrowserHistory } from 'history'
+import APIClient from './apiClient'
+import Login from './Login'
 
-function App() {
+const history = createBrowserHistory();
+global.apiClient = new APIClient();
+
+function UnauthenticatedHeader() {
+  return <p></p>
+}
+
+function UnauthenticatedContent() {
   return (
-    <div className="App">
-      <header className="App-header">
-        <img src={logo} className="App-logo" alt="logo" />
-        <p>
-          Edit <code>src/App.js</code> and save to reload.
-        </p>
-        <a
-          className="App-link"
-          href="https://reactjs.org"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Learn React
-        </a>
-      </header>
-    </div>
+      <Login />
   );
 }
 
-export default App;
+function UnauthenticatedApp() {
+  return (
+    <>
+      <UnauthenticatedHeader />
+      <UnauthenticatedContent />
+    </>
+  )
+}
+
+function AuthenticatedApp() {
+  return (
+    <>
+    <Router history={history}>
+      <Main history={history} />
+    </Router>
+      </>
+  )
+}
+
+function Home() {
+  const username = global.apiClient.username;
+  return username ? <AuthenticatedApp /> : <UnauthenticatedApp />
+}
+
+function App() {
+  const [isAuthenticated, userHasAuthenticated] = useState(false);
+
+  return (
+    <AppContext.Provider value={{ isAuthenticated, userHasAuthenticated }}>
+      <div>
+        <Home />
+      </div>
+    </AppContext.Provider>
+  )
+}
+
+export default App

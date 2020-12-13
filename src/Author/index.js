@@ -24,7 +24,7 @@ const styles = theme => ({
   }
 });
 
-class Book extends React.Component {
+class Author extends React.Component {
 
   render() {
     const { classes } = this.props;
@@ -32,11 +32,11 @@ class Book extends React.Component {
     return (
       <Card className={classes.card}>
         <CardHeader
-          title={this.props.book.title}
+          title={this.props.author.first_name + " " + this.props.author.surname}
         />
         <CardContent>
           <Typography component="p" style={{minHeight: '60px'}}>
-            {this.props.book.author_first_name + " " + this.props.book.author_surname}
+            {"Born " + this.props.author.date_birth}
           </Typography>
         </CardContent>
       </Card>
@@ -44,4 +44,4 @@ class Book extends React.Component {
   }
 }
 
-export default withStyles(styles)(Book);
+export default withStyles(styles)(Author);
