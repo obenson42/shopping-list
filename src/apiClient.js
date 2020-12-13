@@ -1,10 +1,8 @@
 import axios from 'axios';
-
-//const BASE_URI = 'https://obenson-book-list.herokuapp.com/';
-const BASE_URI = 'http://localhost:5000';
+import { config } from './Constants'
 
 const client = axios.create({
- baseURL: BASE_URI,
+ baseURL: config.url.BASE_URI,
  json: true
 });
 
