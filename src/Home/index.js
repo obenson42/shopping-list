@@ -124,7 +124,15 @@ class Home extends React.Component {
   };
 
   resetBooks = books => this.setState({ ...this.state, books })
-  
+
+  onDelete = (book) => {
+      global.apiClient.deleteBook(book);
+      this.setState({
+        ...this.state,
+        books: this.state.books.filter( b => b.id !== book.id )
+      })
+  }
+
   renderBooks = (books) => {
     if (!books) { return [] }
     return (
@@ -148,7 +156,7 @@ class Home extends React.Component {
                       provided.draggableProps.style
                     )}
                   >
-                    <Book onBook={this.onBook} book={item} />
+                    <Book onDelete={this.onDelete} book={item} />
                   </div>
                 )}
               </Draggable>
