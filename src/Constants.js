@@ -11,4 +11,4 @@ const dev = {
     }
 };
 
-export const config = process.env.NPM_CONFIG_PRODUCTION !== "true" ? dev : prod;
+export const config = dev; // prod;

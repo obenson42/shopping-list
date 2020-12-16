@@ -17,34 +17,37 @@ class APIClient {
     return resp;
   }
 
-  createBook(book) {
-    return this.perform('push', '/book', book);
+  getItems() {
+    return this.perform('get', `/items?api_key=${this.accessToken}`);
   }
 
-  deleteBook(book) {
-    return this.perform('delete', `/book/${book.id}`);
+  createItem(item) {
+    return this.perform('push', '/item', item);
   }
 
-  getBooks() {
-    return this.perform('get', '/books/');
+  updateItem(item) {
+    return this.perform('post', '/item_update/', { api_key: this.accessToken, item });
   }
 
-  getAuthors() {
-    return this.perform('get', '/authors/');
+  deleteItem(item) {
+    return this.perform('delete', `/item/${item.id}`);
   }
 
-  getPublishers() {
-    return this.perform('get', '/publishers/');
+  reorderItems(item) {
+    return this.perform('put', `/reorder/`, item);
   }
+
 
   async perform (method, resource, data) {
     return client({
       method,
       url: resource,
       data,
-      headers: {
-        Authorization: `Bearer ${this.accessToken}`
-      }
+      crossDomain: true
+   //   headers: {
+   //     Authorization: `Bearer ${this.accessToken}`,
+   //     APIKey: `${this.accessToken}`
+   //   }
     }).then(resp => {
       return resp.data ? resp.data : [];
     })

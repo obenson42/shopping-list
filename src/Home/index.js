@@ -1,13 +1,11 @@
 import React from 'react';
 import { withStyles } from '@material-ui/core/styles';
-import SwipeableViews from 'react-swipeable-views';
 import Tabs from '@material-ui/core/Tabs';
 import Tab from '@material-ui/core/Tab';
 import Grid from '@material-ui/core/Grid';
 import { DragDropContext, Droppable, Draggable } from "react-beautiful-dnd";
 
-import Book from "../Book"
-import Author from "../Author"
+import ShoppingItem from "../ShoppingItem"
 
 const styles = theme => ({
   root: {
@@ -35,7 +33,7 @@ const grid = 8;
 const getItemStyle = (isDragging, draggableStyle) => ({
   // some basic styles to make the items look a bit nicer
   userSelect: "none",
-  padding: grid * 2,
+  padding: 0,
   margin: `0 0 ${grid}px 0`,
 
   // change background colour if dragging
@@ -46,9 +44,9 @@ const getItemStyle = (isDragging, draggableStyle) => ({
 });
 
 const getListStyle = isDraggingOver => ({
-  background: isDraggingOver ? "lightblue" : "lightgrey",
-  padding: grid,
-  width: 250
+  background: isDraggingOver ? "lightblue" : "background.paper",
+  padding: 1,
+  width: 600
 });
 
 class Home extends React.Component {
@@ -56,11 +54,7 @@ class Home extends React.Component {
     super(props);
     this.state = {
       value: 0,
-      books: [],
-      authors: [],
-      publishers: [],
-      editions: []
-    };
+      items: []    };
     this.onDragEnd = this.onDragEnd.bind(this);
   }
 
@@ -70,36 +64,32 @@ class Home extends React.Component {
       return;
     }
 
-    const books = reorder(
-      this.state.books,
+    // reorder the items in the front end
+    const items = reorder(
+      this.state.items,
       result.source.index,
       result.destination.index
     );
 
     this.setState({
-      books
+      items
     });
+
+    // tell the back end that an item has been moved (back end will update multiple item positions)
+    const item = this.state.items[result.source.index];
+    item.position = result.destination.index;
+    global.apiClient.reorderItems(item);
   }
 
   async componentDidMount() {
-    this.loadBooks();
+    // start with the list of existing items
+    this.loadItems();
   }
 
-  loadBooks() {
-    global.apiClient.getBooks().then((data) =>
-      this.setState({...this.state, books: data["books"]})
-    );
-  }
-
-  loadAuthors() {
-    global.apiClient.getAuthors().then((data) =>
-      this.setState({...this.state, authors: data["authors"]})
-    );
-  }
-
-  loadPublishers() {
-    global.apiClient.getPublishers().then((data) =>
-      this.setState({...this.state, publishers: data["publishers"]})
+    // load any existing items from the user's shopping list
+    loadItems() {
+    global.apiClient.getItems().then((data) =>
+      this.setState({...this.state, items: data["shopping_items"]})
     );
   }
 
@@ -107,13 +97,7 @@ class Home extends React.Component {
     this.setState({ value });
     switch(value) {
       case 0:
-        this.loadBooks();
-        break;
-      case 1:
-        this.loadAuthors();
-        break;
-      case 2:
-        this.loadPublishers();
+        this.loadItems();
         break;
       default:
     }
@@ -123,18 +107,27 @@ class Home extends React.Component {
     this.setState({ value: index });
   };
 
-  resetBooks = books => this.setState({ ...this.state, books })
+  resetItems = items => this.setState({ ...this.state, items })
 
-  onDelete = (book) => {
-      global.apiClient.deleteBook(book);
-      this.setState({
-        ...this.state,
-        books: this.state.books.filter( b => b.id !== book.id )
-      })
+  // user clicked the bought icon on an item, tell the backend
+  onBought = (item) => {
+    item.bought = item.bought === 0 ? 1 : 0; // toggle it
+    global.apiClient.updateItem(item);
   }
 
-  renderBooks = (books) => {
-    if (!books) { return [] }
+  // user clicked the delete icon on an item, remove it from the items array and tell the backend
+  onDelete = (item) => {
+    global.apiClient.deleteItem(item);
+    this.setState({
+      ...this.state,
+      items: this.state.items.filter( i => i.id !== item.id )
+    })
+}
+
+  // using react-beautiful-dnd to enable reordering of the list
+  // this provides DragDropContext, Droppable and Draggable
+  renderItems = (items) => {
+    if (!items) { return [] }
     return (
       <DragDropContext onDragEnd={this.onDragEnd}>
       <Droppable droppableId="droppable">
@@ -144,7 +137,7 @@ class Home extends React.Component {
             ref={provided.innerRef}
             style={getListStyle(snapshot.isDraggingOver)}
           >
-            {this.state.books.map((item, index) => (
+            {this.state.items.map((item, index) => (
               <Draggable key={item.id.toString()} draggableId={item.id.toString()} index={index}>
                 {(provided, snapshot) => (
                   <div
@@ -156,7 +149,7 @@ class Home extends React.Component {
                       provided.draggableProps.style
                     )}
                   >
-                    <Book onDelete={this.onDelete} book={item} />
+                    <ShoppingItem onBought={this.onBought} onDelete={this.onDelete} item={item} />
                   </div>
                 )}
               </Draggable>
@@ -170,19 +163,6 @@ class Home extends React.Component {
   }
   
 
-  resetAuthors = authors => this.setState({ ...this.state, authors })
-  
-  renderAuthors = (authors) => {
-    if (!authors) { return [] }
-    return authors.map((author) => {
-      return (
-        <Grid item xs={12} md={3} key={author.id}>
-          <Author onAuthor={this.onAuthor} author={author} />
-        </Grid>
-      );
-    })
-  }
-
   render() {
     return (
       <div className={styles.root}>
@@ -193,15 +173,11 @@ class Home extends React.Component {
           textColor="primary"
           variant="fullWidth"
         >
-          <Tab label="Books" />
-          <Tab label="Authors" />
-          <Tab label="Publishers" />
+          <Tab label="Items" />
         </Tabs>
       
           <Grid container style={{padding: '20px 0'}}>
-            { this.state.value === 0 ? this.renderBooks(this.state.books) : null }
-            { this.state.value === 1 ? this.renderAuthors(this.state.authors) : null }
-            { this.state.value === 2 ? this.renderBooks(this.state.publishers) : null }
+            { this.state.value === 0 ? this.renderItems(this.state.items) : null }
           </Grid>
       </div>
     );
