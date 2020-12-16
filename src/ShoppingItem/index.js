@@ -66,7 +66,7 @@ class ShoppingItem extends React.Component {
           <DragIndicatorIcon />
           <TitleForm item={this.props.item} />
           <IconButton aria-label="bought" onClick={this.handleClickBought}>
-            {this.props.item.bought === "0" ? <RadioButtonUncheckedIcon /> : <CheckCircleIcon /> }
+            {this.props.item.bought === "0" || this.props.item.bought === "False" ? <RadioButtonUncheckedIcon /> : <CheckCircleIcon /> }
           </IconButton>
           <IconButton aria-label="delete" onClick={this.handleClickDelete}>
             <DeleteIcon />
