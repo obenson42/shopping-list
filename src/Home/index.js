@@ -142,7 +142,7 @@ class Home extends React.Component {
   onBought = (item) => {
     const items = this.state.items;
     item = items.find(i => i.id===item.id);
-    item.bought = item.bought === "0" ? "1" : "0"; // toggle it
+    item.bought = item.bought === "0" || item.bought === "False" ? "1" : "0"; // toggle it
     global.apiClient.updateItem(item);
     this.setState({...this.state, items: items})
   }
