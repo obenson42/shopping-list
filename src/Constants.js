@@ -1,7 +1,7 @@
 // Constants.js
 const prod = {
     url: {
-        BASE_URI: 'https://obenson-shopping-list.herokuapp.com/'
+        BASE_URI: 'https://obenson-shopping-list-back.herokuapp.com/'
     }
 };
 
