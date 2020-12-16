@@ -17,12 +17,16 @@ class APIClient {
     return resp;
   }
 
+  async register(username, password, password2) {
+    const resp = await this.perform('post', '/auth/api_register', { username: username, password: password, password2: password2 });
+    return resp;
+  }
   getItems() {
     return this.perform('get', `/items?api_key=${this.accessToken}`);
   }
 
   createItem(item) {
-    return this.perform('push', '/item', item);
+    return this.perform('post', '/item/', { api_key: this.accessToken, item });
   }
 
   updateItem(item) {
@@ -30,11 +34,11 @@ class APIClient {
   }
 
   deleteItem(item) {
-    return this.perform('delete', `/item/${item.id}`);
+    return this.perform('delete', '/item/', { api_key: this.accessToken, item });
   }
 
   reorderItems(item) {
-    return this.perform('put', `/reorder/`, item);
+    return this.perform('post', '/reorder/', { api_key: this.accessToken, item });
   }
 
 

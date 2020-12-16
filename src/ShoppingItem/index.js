@@ -3,6 +3,7 @@ import Box from '@material-ui/core/Box';
 import IconButton from '@material-ui/core/IconButton';
 import DeleteIcon from '@material-ui/icons/Delete';
 import DragIndicatorIcon from '@material-ui/icons/DragIndicator';
+import RadioButtonUncheckedIcon from '@material-ui/icons/RadioButtonUnchecked';
 import CheckCircleIcon from '@material-ui/icons/CheckCircle';
 
 // form to hold the input field for a shopping item
@@ -18,12 +19,19 @@ class TitleForm extends React.Component {
   // user typed something, update the state
   handleChange(event) {
     this.setState({value: event.target.value});
+    this.props.item.title = event.target.value; // update the connected item too
   }
 
-  // user hit return key
+  // user hit return key, tell backend to create or update the item
   handleSubmit(event) {
-    this.props.item.title = event.target.value;
-    global.apiClient.updateItem(this.props.item);
+    event.preventDefault();
+    if(this.props.item.id === 0) {
+      global.apiClient.createItem(this.props.item).then((data) => {
+        this.props.item.id = data["id"]; // update the item with its new id
+      });
+    } else {
+      global.apiClient.updateItem(this.props.item);
+    }
   }
 
   render() {
@@ -58,7 +66,7 @@ class ShoppingItem extends React.Component {
           <DragIndicatorIcon />
           <TitleForm item={this.props.item} />
           <IconButton aria-label="bought" onClick={this.handleClickBought}>
-            <CheckCircleIcon />
+            {this.props.item.bought === "0" ? <RadioButtonUncheckedIcon /> : <CheckCircleIcon /> }
           </IconButton>
           <IconButton aria-label="delete" onClick={this.handleClickDelete}>
             <DeleteIcon />

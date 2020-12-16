@@ -5,7 +5,6 @@ import Main from './Main'
 import { createBrowserHistory } from 'history'
 import APIClient from './apiClient'
 import Login from './Login'
-import Register from './Register';
 
 const history = createBrowserHistory();
 global.apiClient = new APIClient();
@@ -16,10 +15,7 @@ function UnauthenticatedHeader() {
 
 function UnauthenticatedContent() {
   return (
-    <>
       <Login />
-      <Register />
-    </>
   );
 }
 

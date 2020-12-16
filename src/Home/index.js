@@ -3,6 +3,8 @@ import { withStyles } from '@material-ui/core/styles';
 import Tabs from '@material-ui/core/Tabs';
 import Tab from '@material-ui/core/Tab';
 import Grid from '@material-ui/core/Grid';
+import IconButton from '@material-ui/core/IconButton';
+import AddCircleOutlineIcon from '@material-ui/icons/AddCircleOutline';
 import { DragDropContext, Droppable, Draggable } from "react-beautiful-dnd";
 
 import ShoppingItem from "../ShoppingItem"
@@ -86,13 +88,14 @@ class Home extends React.Component {
     this.loadItems();
   }
 
-    // load any existing items from the user's shopping list
-    loadItems() {
+  // load any existing items from the user's shopping list
+  loadItems() {
     global.apiClient.getItems().then((data) =>
       this.setState({...this.state, items: data["shopping_items"]})
     );
   }
 
+  // the tab stuff does nothing useful here
   handleTabChange = (event, value) => {
     this.setState({ value });
     switch(value) {
@@ -107,12 +110,41 @@ class Home extends React.Component {
     this.setState({ value: index });
   };
 
+  // user clicked the icon to add another item
+  handleClickAdd = (event) => {
+    const items = this.state.items;
+    const position = items.length > 0 ? items[items.length-1].position + 1 : 0;
+    const newItem = { id: 0, title:"", bought:"0", position:position };
+    if(items.length > 0) {
+      const item = items[items.length-1];
+      if(item.id === 0) {
+        // previous item hasn't been sent to back end so do that, then add the new item to the state
+        global.apiClient.createItem(item).then((data) => {
+          item.id = data["id"]; // update the item with its new id
+          items.push(newItem);
+          this.setState({...this.state, items: items})
+        });
+      } else {
+        // add the new item to the state
+        items.push(newItem);
+        this.setState({...this.state, items: items})
+      }
+    } else {
+      // add the new item to the state
+      items.push(newItem);
+      this.setState({...this.state, items: items})
+    }
+  }
+
   resetItems = items => this.setState({ ...this.state, items })
 
   // user clicked the bought icon on an item, tell the backend
   onBought = (item) => {
-    item.bought = item.bought === 0 ? 1 : 0; // toggle it
+    const items = this.state.items;
+    item = items.find(i => i.id===item.id);
+    item.bought = item.bought === "0" ? "1" : "0"; // toggle it
     global.apiClient.updateItem(item);
+    this.setState({...this.state, items: items})
   }
 
   // user clicked the delete icon on an item, remove it from the items array and tell the backend
@@ -177,8 +209,11 @@ class Home extends React.Component {
         </Tabs>
       
           <Grid container style={{padding: '20px 0'}}>
-            { this.state.value === 0 ? this.renderItems(this.state.items) : null }
+            {this.renderItems(this.state.items)}
           </Grid>
+          <IconButton aria-label="add item" onClick={this.handleClickAdd}>
+            <AddCircleOutlineIcon />
+          </IconButton>
       </div>
     );
   }
