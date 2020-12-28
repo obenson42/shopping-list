@@ -10,7 +10,8 @@ import CheckCircleIcon from '@material-ui/icons/CheckCircle';
 class TitleForm extends React.Component {
   constructor(props) {
     super(props);
-    this.state = {value: props.item.title};
+    this.state = {item: props.item};
+    console.log("c:" + this.props.item.id + ":" + this.props.item.title);
 
     this.handleChange = this.handleChange.bind(this);
     this.handleSubmit = this.handleSubmit.bind(this);
@@ -18,26 +19,29 @@ class TitleForm extends React.Component {
 
   // user typed something, update the state
   handleChange(event) {
-    this.setState({value: event.target.value});
-    this.props.item.title = event.target.value; // update the connected item too
+    const item = this.state.item;
+    item.title = event.target.value;
+    this.setState({item: item});
+//    this.props.item.title = event.target.value; // update the connected item too
   }
 
   // user hit return key, tell backend to create or update the item
   handleSubmit(event) {
     event.preventDefault();
-    if(this.props.item.id === 0) {
-      global.apiClient.createItem(this.props.item).then((data) => {
-        this.props.item.id = data["id"]; // update the item with its new id
+    if(this.state.item.id === 0) {
+      global.apiClient.createItem(this.state.item).then((data) => {
+        this.props.onUpdateID(data["id"]);
       });
     } else {
-      global.apiClient.updateItem(this.props.item);
+      global.apiClient.updateItem(this.state.item);
     }
   }
 
   render() {
+    console.log("r:" + this.state.item.id + ":" + this.state.item.title);
     return (
       <form onSubmit={this.handleSubmit}>
-          <input type="text" size="50" value={this.state.value} onChange={this.handleChange} />
+          <input type="text" size="50" value={this.state.item.title} onChange={this.handleChange} />
       </form>
     );
   }
@@ -45,6 +49,16 @@ class TitleForm extends React.Component {
 
 // the ShoppingItem containing a text field, 'bought' icon, 'delete' icon and draggable icon
 class ShoppingItem extends React.Component {
+  constructor(props) {
+    super(props);
+    this.state = {value: props.item.id};
+  }
+
+  handleIDChange = (id) => {
+    this.props.item.id = id;
+    this.setState({value: this.props.item.id});
+  }
+
   handleClickBought = (event) =>  {
     this.props.onBought(this.props.item)
   }
@@ -57,14 +71,14 @@ class ShoppingItem extends React.Component {
     return (
       <Box
         color="primary.main"
-        bgcolor="background.paper"
+        bgcolor={this.props.item.id === 0 ? "pink" : "background.paper"}
         borderColor="blue"
         border={1}
         p={{ xs: 0, sm: 1, md: 2 }}
         display="flex"
       >
           <DragIndicatorIcon />
-          <TitleForm item={this.props.item} />
+          <TitleForm onUpdateID={this.handleIDChange} item={this.props.item} />
           <IconButton aria-label="bought" onClick={this.handleClickBought}>
             {this.props.item.bought === "0" || this.props.item.bought === "False" ? <RadioButtonUncheckedIcon /> : <CheckCircleIcon /> }
           </IconButton>

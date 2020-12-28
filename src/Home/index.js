@@ -80,7 +80,18 @@ class Home extends React.Component {
     // tell the back end that an item has been moved (back end will update multiple item positions)
     const item = this.state.items[result.source.index];
     item.position = result.destination.index;
-    global.apiClient.reorderItems(item);
+    // if item hasn't been saved yet send it to the backend
+    if (item.id === 0) {
+      global.apiClient.createItem(item).then((data) => {
+        item.id = data["id"]; // update the item with its new id
+        global.apiClient.reorderItems(item);
+        this.setState({
+          items
+        });
+      });
+    } else {
+      global.apiClient.reorderItems(item);
+    }
   }
 
   async componentDidMount() {
@@ -121,35 +132,38 @@ class Home extends React.Component {
         // previous item hasn't been sent to back end so do that, then add the new item to the state
         global.apiClient.createItem(item).then((data) => {
           item.id = data["id"]; // update the item with its new id
+          // add the new item to the state
           items.push(newItem);
-          this.setState({...this.state, items: items})
+          this.setState({...this.state, items})
         });
       } else {
         // add the new item to the state
         items.push(newItem);
-        this.setState({...this.state, items: items})
+        this.setState({...this.state, items})
       }
     } else {
       // add the new item to the state
       items.push(newItem);
-      this.setState({...this.state, items: items})
+      this.setState({...this.state, items})
     }
   }
 
   resetItems = items => this.setState({ ...this.state, items })
 
-  // user clicked the bought icon on an item, tell the backend
+  // user clicked the bought icon on an item, tell the backend (if it has an id)
   onBought = (item) => {
     const items = this.state.items;
     item = items.find(i => i.id===item.id);
     item.bought = item.bought === "0" || item.bought === "False" ? "1" : "0"; // toggle it
-    global.apiClient.updateItem(item);
+    if (item.id !== 0)
+      global.apiClient.updateItem(item);
     this.setState({...this.state, items: items})
   }
 
-  // user clicked the delete icon on an item, remove it from the items array and tell the backend
+  // user clicked the delete icon on an item, remove it from the items array and tell the backend (if it has an id)
   onDelete = (item) => {
-    global.apiClient.deleteItem(item);
+    if (item.id !== 0)
+      global.apiClient.deleteItem(item);
     this.setState({
       ...this.state,
       items: this.state.items.filter( i => i.id !== item.id )
