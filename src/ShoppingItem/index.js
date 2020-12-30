@@ -80,7 +80,7 @@ class ShoppingItem extends React.Component {
           <DragIndicatorIcon />
           <TitleForm onSubmit={this.handleSubmit} item={this.state.item} />
           <IconButton aria-label="bought" onClick={this.handleClickBought} style={{padding: "0 6px"}}>
-            {this.state.item.bought === "0" || this.state.item.bought === "False" ? <RadioButtonUncheckedIcon /> : <CheckCircleIcon /> }
+            {this.state.item.bought === 0 ? <RadioButtonUncheckedIcon /> : <CheckCircleIcon /> }
           </IconButton>
           <IconButton aria-label="delete" onClick={this.handleClickDelete} style={{padding: "0 6px"}}>
             <DeleteIcon />
