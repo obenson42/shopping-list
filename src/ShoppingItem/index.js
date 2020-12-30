@@ -11,7 +11,6 @@ class TitleForm extends React.Component {
   constructor(props) {
     super(props);
     this.state = {item: props.item};
-    console.log("c:" + this.props.item.id + ":" + this.props.item.title);
 
     this.handleChange = this.handleChange.bind(this);
     this.handleSubmit = this.handleSubmit.bind(this);
@@ -22,23 +21,15 @@ class TitleForm extends React.Component {
     const item = this.state.item;
     item.title = event.target.value;
     this.setState({item: item});
-//    this.props.item.title = event.target.value; // update the connected item too
   }
 
   // user hit return key, tell backend to create or update the item
   handleSubmit(event) {
     event.preventDefault();
-    if(this.state.item.id === 0) {
-      global.apiClient.createItem(this.state.item).then((data) => {
-        this.props.onUpdateID(data["id"]);
-      });
-    } else {
-      global.apiClient.updateItem(this.state.item);
-    }
+    this.props.onSubmit(event);
   }
 
   render() {
-    console.log("r:" + this.state.item.id + ":" + this.state.item.title);
     return (
       <form onSubmit={this.handleSubmit}>
           <input type="text" size="50" value={this.state.item.title} onChange={this.handleChange} />
@@ -51,12 +42,21 @@ class TitleForm extends React.Component {
 class ShoppingItem extends React.Component {
   constructor(props) {
     super(props);
-    this.state = {value: props.item.id};
+    this.state = {item: props.item};
   }
 
-  handleIDChange = (id) => {
-    this.props.item.id = id;
-    this.setState({value: this.props.item.id});
+  handleSubmit = (event) => {
+    if(this.state.item.id === 0) {
+      global.apiClient.createItem(this.state.item).then((data) => {
+        const item = this.state.item;
+        item.id = data["id"];
+        this.setState({item: item});
+        // tell parent to add another shopping item
+        this.props.onAdd();
+      });
+    } else {
+      global.apiClient.updateItem(this.state.item);
+    }
   }
 
   handleClickBought = (event) =>  {
@@ -71,18 +71,18 @@ class ShoppingItem extends React.Component {
     return (
       <Box
         color="primary.main"
-        bgcolor={this.props.item.id === 0 ? "pink" : "background.paper"}
+        bgcolor={this.props.item.id === 0 ? "pink" : "inherited"}
         borderColor="blue"
-        border={1}
-        p={{ xs: 0, sm: 1, md: 2 }}
+        border={0}
+        p={{ xs: 0, sm: 0.5 }}
         display="flex"
       >
           <DragIndicatorIcon />
-          <TitleForm onUpdateID={this.handleIDChange} item={this.props.item} />
-          <IconButton aria-label="bought" onClick={this.handleClickBought}>
-            {this.props.item.bought === "0" || this.props.item.bought === "False" ? <RadioButtonUncheckedIcon /> : <CheckCircleIcon /> }
+          <TitleForm onSubmit={this.handleSubmit} item={this.state.item} />
+          <IconButton aria-label="bought" onClick={this.handleClickBought} style={{padding: "0 6px"}}>
+            {this.state.item.bought === "0" || this.state.item.bought === "False" ? <RadioButtonUncheckedIcon /> : <CheckCircleIcon /> }
           </IconButton>
-          <IconButton aria-label="delete" onClick={this.handleClickDelete}>
+          <IconButton aria-label="delete" onClick={this.handleClickDelete} style={{padding: "0 6px"}}>
             <DeleteIcon />
           </IconButton>
       </Box>

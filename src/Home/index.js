@@ -39,26 +39,28 @@ const getItemStyle = (isDragging, draggableStyle) => ({
   margin: `0 0 ${grid}px 0`,
 
   // change background colour if dragging
-  background: isDragging ? "lightgreen" : "grey",
+  background: isDragging ? "lightgreen" : "white",
 
   // styles we need to apply on draggables
   ...draggableStyle
 });
 
 const getListStyle = isDraggingOver => ({
-  background: isDraggingOver ? "lightblue" : "background.paper",
-  padding: 1,
-  width: 600
+  background: isDraggingOver ? "lightblue" : "white",
+  padding: 1
 });
 
 class Home extends React.Component {
   constructor(props) {
     super(props);
     this.state = {
-      value: 0,
-      items: []    };
+      tabindex: 0,
+      items: []
+    };
     this.onDragEnd = this.onDragEnd.bind(this);
   }
+
+  resetItems = items => this.setState({ ...this.state, items: items })
 
   onDragEnd(result) {
     // dropped outside the list
@@ -73,9 +75,7 @@ class Home extends React.Component {
       result.destination.index
     );
 
-    this.setState({
-      items
-    });
+    this.resetItems(items);
 
     // tell the back end that an item has been moved (back end will update multiple item positions)
     const item = this.state.items[result.source.index];
@@ -85,9 +85,7 @@ class Home extends React.Component {
       global.apiClient.createItem(item).then((data) => {
         item.id = data["id"]; // update the item with its new id
         global.apiClient.reorderItems(item);
-        this.setState({
-          items
-        });
+        this.resetItems(items);
       });
     } else {
       global.apiClient.reorderItems(item);
@@ -102,14 +100,14 @@ class Home extends React.Component {
   // load any existing items from the user's shopping list
   loadItems() {
     global.apiClient.getItems().then((data) =>
-      this.setState({...this.state, items: data["shopping_items"]})
+      this.resetItems(data["shopping_items"])
     );
   }
 
   // the tab stuff does nothing useful here
-  handleTabChange = (event, value) => {
-    this.setState({ value });
-    switch(value) {
+  handleTabChange = (event, tabindex) => {
+    this.setState({ ...this.state, tabindex: tabindex });
+    switch(tabindex) {
       case 0:
         this.loadItems();
         break;
@@ -118,11 +116,21 @@ class Home extends React.Component {
   };
 
   handleTabChangeIndex = index => {
-    this.setState({ value: index });
+    this.setState({ tabindex: index });
   };
 
   // user clicked the icon to add another item
   handleClickAdd = (event) => {
+    this.addNewItem();
+  }
+
+  onAdd = () => {
+    const items = this.state.items;
+    this.resetItems(items);
+    this.addNewItem();
+  }
+
+  addNewItem() {
     const items = this.state.items;
     const position = items.length > 0 ? items[items.length-1].position + 1 : 0;
     const newItem = { id: 0, title:"", bought:"0", position:position };
@@ -132,23 +140,22 @@ class Home extends React.Component {
         // previous item hasn't been sent to back end so do that, then add the new item to the state
         global.apiClient.createItem(item).then((data) => {
           item.id = data["id"]; // update the item with its new id
+          this.resetItems(items);
           // add the new item to the state
           items.push(newItem);
-          this.setState({...this.state, items})
+          this.resetItems(items);
         });
       } else {
         // add the new item to the state
         items.push(newItem);
-        this.setState({...this.state, items})
+        this.resetItems(items);
       }
     } else {
       // add the new item to the state
       items.push(newItem);
-      this.setState({...this.state, items})
+      this.resetItems(items);
     }
   }
-
-  resetItems = items => this.setState({ ...this.state, items })
 
   // user clicked the bought icon on an item, tell the backend (if it has an id)
   onBought = (item) => {
@@ -157,7 +164,7 @@ class Home extends React.Component {
     item.bought = item.bought === "0" || item.bought === "False" ? "1" : "0"; // toggle it
     if (item.id !== 0)
       global.apiClient.updateItem(item);
-    this.setState({...this.state, items: items})
+      this.resetItems(items);
   }
 
   // user clicked the delete icon on an item, remove it from the items array and tell the backend (if it has an id)
@@ -175,7 +182,7 @@ class Home extends React.Component {
   renderItems = (items) => {
     if (!items) { return [] }
     return (
-      <DragDropContext onDragEnd={this.onDragEnd}>
+    <DragDropContext onDragEnd={this.onDragEnd}>
       <Droppable droppableId="droppable">
         {(provided, snapshot) => (
           <div
@@ -195,7 +202,7 @@ class Home extends React.Component {
                       provided.draggableProps.style
                     )}
                   >
-                    <ShoppingItem onBought={this.onBought} onDelete={this.onDelete} item={item} />
+                    <ShoppingItem onBought={this.onBought} onDelete={this.onDelete} onAdd={this.onAdd} item={item} />
                   </div>
                 )}
               </Draggable>
@@ -211,9 +218,9 @@ class Home extends React.Component {
 
   render() {
     return (
-      <div className={styles.root}>
+      <div className={styles.root} style={{textAlign: 'center'}}>
         <Tabs
-          value={this.state.value}
+          value={this.state.tabindex}
           onChange={this.handleTabChange}
           indicatorColor="primary"
           textColor="primary"
@@ -222,10 +229,10 @@ class Home extends React.Component {
           <Tab label="Items" />
         </Tabs>
       
-          <Grid container style={{padding: '20px 0'}}>
+          <Grid container style={{padding: '20px 0 0 0', justifyContent: 'center'}}>
             {this.renderItems(this.state.items)}
           </Grid>
-          <IconButton aria-label="add item" onClick={this.handleClickAdd}>
+          <IconButton aria-label="add item" onClick={this.handleClickAdd} style={{textAlign: 'center'}}>
             <AddCircleOutlineIcon />
           </IconButton>
       </div>
