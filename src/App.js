@@ -4,10 +4,12 @@ import { AppContext } from "./contextLib";
 import Main from './Main'
 import { createBrowserHistory } from 'history'
 import APIClient from './apiClient'
+import APITescoPrices from './apiTescoPrices'
 import Login from './Login'
 
 const history = createBrowserHistory();
 global.apiClient = new APIClient();
+global.apiTescoPrices = new APITescoPrices("ca58f691ff944fd59a27347a944d9254");
 
 function UnauthenticatedHeader() {
   return <p></p>

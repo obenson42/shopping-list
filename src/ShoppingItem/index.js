@@ -1,5 +1,6 @@
 import React from 'react';
 import Box from '@material-ui/core/Box';
+import TextField from '@material-ui/core/TextField';
 import IconButton from '@material-ui/core/IconButton';
 import DeleteIcon from '@material-ui/icons/Delete';
 import DragIndicatorIcon from '@material-ui/icons/DragIndicator';
@@ -31,8 +32,12 @@ class TitleForm extends React.Component {
 
   render() {
     return (
-      <form onSubmit={this.handleSubmit}>
-          <input type="text" size="50" value={this.state.item.title} onChange={this.handleChange} />
+      <form onSubmit={this.handleSubmit} className='itemTextForm'>
+          <TextField value={this.state.item.title}
+            onChange={this.handleChange}
+            fullWidth={true}
+            inputProps={{ 'aria-label': 'an item to be bought' }}
+          />
       </form>
     );
   }
@@ -42,7 +47,14 @@ class TitleForm extends React.Component {
 class ShoppingItem extends React.Component {
   constructor(props) {
     super(props);
-    this.state = {item: props.item};
+    this.state = {
+      item: props.item,
+      price: 0.0
+    };
+  }
+  
+  componentDidMount() {
+    global.apiTescoPrices.getItemPrice(this.state.item.title).then((response) => this.setState({ ...this.state, price: response }));
   }
 
   handleSubmit = (event) => {
@@ -72,13 +84,13 @@ class ShoppingItem extends React.Component {
       <Box
         color="primary.main"
         bgcolor={this.props.item.id === 0 ? "pink" : "inherited"}
-        borderColor="blue"
         border={0}
         p={{ xs: 0, sm: 0.5 }}
         display="flex"
       >
           <DragIndicatorIcon />
           <TitleForm onSubmit={this.handleSubmit} item={this.state.item} />
+          <div className="price">£{parseFloat(this.state.price, 10).toFixed(2)}</div>
           <IconButton aria-label="bought" onClick={this.handleClickBought} style={{padding: "0 6px"}}>
             {this.state.item.bought === 0 ? <RadioButtonUncheckedIcon /> : <CheckCircleIcon /> }
           </IconButton>

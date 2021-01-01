@@ -133,7 +133,7 @@ class Home extends React.Component {
   addNewItem() {
     const items = this.state.items;
     const position = items.length > 0 ? items[items.length-1].position + 1 : 0;
-    const newItem = { id: 0, title:"", bought:"0", position:position };
+    const newItem = { id: 0, title:"", bought:0, position:position };
     if(items.length > 0) {
       const item = items[items.length-1];
       if(item.id === 0) {

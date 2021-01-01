@@ -7,11 +7,6 @@ const client = axios.create({
 });
 
 class APIClient {
-  constructor(accessToken) {
-    this.accessToken = accessToken;
-    this.username = null;
-  }
-
   async login(username, password) {
     const resp = await this.perform('post', '/auth/api_login', { username: username, password: password });
     return resp;
@@ -48,10 +43,6 @@ class APIClient {
       url: resource,
       data,
       crossDomain: true
-   //   headers: {
-   //     Authorization: `Bearer ${this.accessToken}`,
-   //     APIKey: `${this.accessToken}`
-   //   }
     }).then(resp => {
       return resp.data ? resp.data : [];
     })
