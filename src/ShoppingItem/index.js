@@ -36,6 +36,7 @@ class TitleForm extends React.Component {
           <TextField value={this.state.item.title}
             onChange={this.handleChange}
             fullWidth={true}
+            autoFocus={true}
             inputProps={{ 'aria-label': 'an item to be bought' }}
           />
       </form>
@@ -54,7 +55,8 @@ class ShoppingItem extends React.Component {
   }
   
   componentDidMount() {
-    global.apiTescoPrices.getItemPrice(this.state.item.title).then((response) => this.setState({ ...this.state, price: response }));
+    if(this.state.item && this.state.item.title)
+      global.apiTescoPrices.getItemPrice(this.state.item.title).then((response) => this.setState({ ...this.state, price: response }));
   }
 
   handleSubmit = (event) => {
