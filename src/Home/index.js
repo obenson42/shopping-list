@@ -58,10 +58,38 @@ class Home extends React.Component {
       items: []
     };
     this.onDragEnd = this.onDragEnd.bind(this);
+    this.onPriced = this.onPriced.bind(this);
   }
 
-  resetItems = items => this.setState({ ...this.state, items: items })
+  resetItems = items => {
+    this.setState({ ...this.state, items: items });
+    this.updateListTotal();
+  }
 
+  updateListTotal() {
+    let total = 0.0;
+    
+    const items = this.state.items;
+    for(let i = 0; i < items.length; i++) {
+      let item = items[i];
+      //console.log("price=" + item.price);
+      total += item.price ? item.price : 0;
+    }
+    document.getElementById("tabItems").firstChild.textContent = "Items (total: £" + total + ")";
+  }
+
+  onPriced(itemPriced, price) {
+    const items = this.state.items;
+    for(let i = 0; i < items.length; i++) {
+      let item = items[i];
+      if(item.id === itemPriced.id) {
+        item.price = price;
+        break;
+      }
+    }
+    this.updateListTotal();
+  }
+  
   onDragEnd(result) {
     // dropped outside the list
     if (!result.destination) {
@@ -99,7 +127,7 @@ class Home extends React.Component {
 
   // load any existing items from the user's shopping list
   loadItems() {
-    global.apiClient.getItems().then((data) =>
+    global.apiClient.getItems().then((data) => 
       this.resetItems(data["shopping_items"])
     );
   }
@@ -202,7 +230,7 @@ class Home extends React.Component {
                       provided.draggableProps.style
                     )}
                   >
-                    <ShoppingItem onBought={this.onBought} onDelete={this.onDelete} onAdd={this.onAdd} item={item} />
+                    <ShoppingItem onBought={this.onBought} onDelete={this.onDelete} onAdd={this.onAdd} onPriced={this.onPriced} item={item} />
                   </div>
                 )}
               </Draggable>
@@ -226,7 +254,7 @@ class Home extends React.Component {
           textColor="primary"
           variant="fullWidth"
         >
-          <Tab label="Items" />
+          <Tab label="Items" id="tabItems"/>
         </Tabs>
       
           <Grid container style={{padding: '20px 0 0 0', justifyContent: 'center'}}>

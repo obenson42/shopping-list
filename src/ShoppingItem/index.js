@@ -55,8 +55,12 @@ class ShoppingItem extends React.Component {
   }
   
   componentDidMount() {
-    if(this.state.item && this.state.item.title)
-      global.apiTescoPrices.getItemPrice(this.state.item.title).then((response) => this.setState({ ...this.state, price: response }));
+    if(this.state.item && this.state.item.title) {
+      global.apiTescoPrices.getItemPrice(this.state.item.title).then((response) => {
+        this.setState({ ...this.state, price: response });
+        this.props.onPriced(this.state.item, parseFloat(response));
+      });
+    }
   }
 
   handleSubmit = (event) => {
