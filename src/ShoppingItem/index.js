@@ -1,111 +1,77 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import Box from '@material-ui/core/Box';
-import TextField from '@material-ui/core/TextField';
 import IconButton from '@material-ui/core/IconButton';
 import DeleteIcon from '@material-ui/icons/Delete';
 import DragIndicatorIcon from '@material-ui/icons/DragIndicator';
 import RadioButtonUncheckedIcon from '@material-ui/icons/RadioButtonUnchecked';
 import CheckCircleIcon from '@material-ui/icons/CheckCircle';
-
-// form to hold the input field for a shopping item
-class TitleForm extends React.Component {
-  constructor(props) {
-    super(props);
-    this.state = {item: props.item};
-
-    this.handleChange = this.handleChange.bind(this);
-    this.handleSubmit = this.handleSubmit.bind(this);
-  }
-
-  // user typed something, update the state
-  handleChange(event) {
-    const item = this.state.item;
-    item.title = event.target.value;
-    this.setState({item: item});
-  }
-
-  // user hit return key, tell backend to create or update the item
-  handleSubmit(event) {
-    event.preventDefault();
-    this.props.onSubmit(event);
-  }
-
-  render() {
-    return (
-      <form onSubmit={this.handleSubmit} className='itemTextForm'>
-          <TextField value={this.state.item.title}
-            onChange={this.handleChange}
-            fullWidth={true}
-            autoFocus={true}
-            inputProps={{ 'aria-label': 'an item to be bought' }}
-          />
-      </form>
-    );
-  }
-}
+import TitleOrChoice from './TitleOrChoice'
 
 // the ShoppingItem containing a text field, 'bought' icon, 'delete' icon and draggable icon
-class ShoppingItem extends React.Component {
-  constructor(props) {
-    super(props);
-    this.state = {
-      item: props.item,
-      price: 0.0
-    };
-  }
+export default function ShoppingItem(props) {
+  const item = props.item;
+  const [price, setPrice] = useState(0.0);
+  const [productChoices, setProductChoices] = useState([]);
   
-  componentDidMount() {
-    if(this.state.item && this.state.item.title) {
-      global.apiTescoPrices.getItemPrice(this.state.item.title).then((response) => {
-        this.setState({ ...this.state, price: response });
-        this.props.onPriced(this.state.item, parseFloat(response));
+  useEffect(() => {
+    if(item && item.title && !price && (productChoices.length === 0)) { // price and productChoices tests ensure it doesn't get called once there's been a response
+      global.apiTescoPrices.getItemPrice(item.title).then(response => {
+        if(typeof(response) === "number") {
+          setPrice(response);
+          props.onPriced(item, parseFloat(response));
+        } else {
+          if(response.length > 1) {
+            setProductChoices(response);
+          }
+        }
+      })
+      .catch(error => {
+        console.log("Error: " + error);
       });
     }
-  }
+  });
 
-  handleSubmit = (event) => {
-    if(this.state.item.id === 0) {
-      global.apiClient.createItem(this.state.item).then((data) => {
-        const item = this.state.item;
+  const handleTitleSet = (title) => {
+    item.title = title;
+    if(item.id === 0) {
+      global.apiClient.createItem(item).then((data) => {
         item.id = data["id"];
-        this.setState({item: item});
         // tell parent to add another shopping item
-        this.props.onAdd();
+        props.onAdd();
       });
     } else {
-      global.apiClient.updateItem(this.state.item);
+      global.apiClient.updateItem(item);
     }
   }
 
-  handleClickBought = (event) =>  {
-    this.props.onBought(this.props.item)
+  const handleClickBought = (event) =>  {
+    props.onBought(props.item)
   }
 
-  handleClickDelete = (event) =>  {
-    this.props.onDelete(this.props.item)
+  const handleClickDelete = (event) =>  {
+    props.onDelete(props.item)
   }
 
-  render() {
-    return (
-      <Box
-        color="primary.main"
-        bgcolor={this.props.item.id === 0 ? "pink" : "inherited"}
-        border={0}
-        p={{ xs: 0, sm: 0.5 }}
-        display="flex"
-      >
-          <DragIndicatorIcon />
-          <TitleForm onSubmit={this.handleSubmit} item={this.state.item} />
-          <div className="price">£{parseFloat(this.state.price, 10).toFixed(2)}</div>
-          <IconButton aria-label="bought" onClick={this.handleClickBought} style={{padding: "0 6px"}}>
-            {this.state.item.bought === 0 ? <RadioButtonUncheckedIcon /> : <CheckCircleIcon /> }
-          </IconButton>
-          <IconButton aria-label="delete" onClick={this.handleClickDelete} style={{padding: "0 6px"}}>
-            <DeleteIcon />
-          </IconButton>
-      </Box>
-    );
+  const handlePriced = (price) => {
+    props.onPriced(item, price);
   }
+
+  return (
+    <Box
+      color="primary.main"
+      bgcolor={item.id === 0 ? "pink" : "inherited"}
+      border={0}
+      p={{ xs: 0, sm: 0.5 }}
+      display="flex"
+    >
+        <DragIndicatorIcon />
+        <TitleOrChoice id={item.id} title={item.title} price={price} productChoices={productChoices} onTitleSet={handleTitleSet} onSetPrice={handlePriced} />
+        <IconButton aria-label="bought" onClick={handleClickBought} style={{padding: "0 6px"}}>
+          {item.bought === 0 ? <RadioButtonUncheckedIcon /> : <CheckCircleIcon /> }
+        </IconButton>
+        <IconButton aria-label="delete" onClick={handleClickDelete} style={{padding: "0 6px"}}>
+          <DeleteIcon />
+        </IconButton>
+    </Box>
+  );
 }
-
-export default ShoppingItem;

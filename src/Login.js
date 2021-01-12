@@ -1,15 +1,26 @@
-import React, { useState } from "react";
-import Form from "react-bootstrap/Form";
-import Button from "react-bootstrap/Button";
+import React, { useState } from 'react';
+import Button from '@material-ui/core/Button';
+import TextField from '@material-ui/core/TextField';
+import { makeStyles } from '@material-ui/core/styles';
 import { useAppContext } from "./contextLib";
 import Register from './Register';
-import "./Login.css";
+import './Login.css';
+
+const useStyles = makeStyles((theme) => ({
+  root: {
+    '& .MuiTextField-root': {
+      margin: theme.spacing(1),
+      width: '100%',
+    },
+  },
+}));
 
 export default function Login() {
-    const { userHasAuthenticated } = useAppContext();
-    const [username, setUsername] = useState("");
-    const [password, setPassword] = useState("");
-    const [showRegister, setShowRegister] = React.useState(false);
+  const classes = useStyles();
+  const { userHasAuthenticated } = useAppContext();
+  const [username, setUsername] = useState("");
+  const [password, setPassword] = useState("");
+  const [showRegister, setShowRegister] = React.useState(false);
 
   function validateForm() {
     return username.length > 0 && password.length > 0;
@@ -30,36 +41,32 @@ export default function Login() {
     <>
       { showRegister ? <Register /> : 
       <div className="Login">
-        <Form onSubmit={handleSubmit} className="col-md-4 col-12 px-sm-1">
-          <Form.Group controlId="username" className="form-group mb-1 mb-md-3">
-            <Form.Label className="mr-sm-2 mb-0 mb-sm-1">Username</Form.Label>
-            <Form.Control
-              autoFocus
-              type="text"
-              value={username}
-              onChange={(e) => setUsername(e.target.value)}
-              className="form-control mb-sm-0 mb-2 mr-sm-2 px-sm-1 py-sm-0"
-            />
-          </Form.Group>
-          <Form.Group controlId="password" className="form-group mb-1 mb-md-3">
-            <Form.Label className="mr-sm-2 mb-0 mb-sm-1">Password</Form.Label>
-            <Form.Control
-              type="password"
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-              className="form-control mb-sm-0 mb-2 mr-sm-2 px-sm-1 py-sm-0"
-            />
-          </Form.Group>
-          <Button block type="submit" disabled={!validateForm()} className="btn btn-primary btn-sm">
+        <form className={classes.root} onSubmit={handleSubmit}>
+          <TextField
+            autoFocus
+            required
+            type="text"
+            label="Username"
+            variant="outlined"
+            value={username}
+            onChange={(e) => setUsername(e.target.value)}
+          />
+          <TextField
+            required
+            type="password"
+            variant="outlined"
+            label="Password"
+            value={password}
+            onChange={(e) => setPassword(e.target.value)}
+          />
+          <Button className="login" type="submit" disabled={!validateForm()} variant="contained">
             Login
           </Button>
           <div className="linkToRegister">
-            <p>OR</p>
-            <button onClick={onClickRegister} className="aslink">
-            Register
-            </button>
+            <hr />
+            <p>New user? <Button onClick={onClickRegister}>Register</Button></p>
           </div>
-        </Form>
+        </form>
       </div>
       }
     </>

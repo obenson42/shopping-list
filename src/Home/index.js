@@ -75,7 +75,8 @@ class Home extends React.Component {
       //console.log("price=" + item.price);
       total += item.price ? item.price : 0;
     }
-    document.getElementById("tabItems").firstChild.textContent = "Items (total: £" + total + ")";
+    if(document.getElementById("tabItems"))
+      document.getElementById("tabItems").firstChild.textContent = "Items (total: £" + total.toFixed(2) + ")";
   }
 
   onPriced(itemPriced, price) {

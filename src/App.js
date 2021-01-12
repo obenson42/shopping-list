@@ -9,7 +9,7 @@ import Login from './Login'
 
 const history = createBrowserHistory();
 global.apiClient = new APIClient();
-global.apiTescoPrices = new APITescoPrices("ca58f691ff944fd59a27347a944d9254");
+global.apiTescoPrices = new APITescoPrices(""); // needs subscription key
 
 function UnauthenticatedHeader() {
   return <p></p>
