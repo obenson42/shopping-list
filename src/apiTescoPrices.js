@@ -3,7 +3,7 @@ import { config } from './Constants'
 
 const client = axios.create({
  //baseURL: "https://dev.tescolabs.com/grocery/",
- baseURL: config.url.BASE_URI,
+ baseURL: config.url.BASE_URI + "mock_tesco/",
  json: true
 });
 
@@ -13,9 +13,9 @@ class APITescoPrices {
   }
 
   getItemPrice(itemText) {
-    if(itemText)
+    if(itemText) {
         return this.perform('get', `products/?query=${itemText}&offset=0&limit=25`);
-    else
+    } else
       return new Promise(function(resolve, reject) {resolve(0.0)});
   }
 

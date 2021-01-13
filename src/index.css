@@ -15,8 +15,3 @@ code {
 .itemTextForm {
   flex-grow: 10;
 }
-
-.price {
-  padding-left: 1rem;
-  padding-right: 0.5rem;
-}

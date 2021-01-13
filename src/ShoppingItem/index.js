@@ -52,7 +52,8 @@ export default function ShoppingItem(props) {
     props.onDelete(props.item)
   }
 
-  const handlePriced = (price) => {
+  const handleOptionChosen = (title, price) => {
+    handleTitleSet(title);
     props.onPriced(item, price);
   }
 
@@ -65,7 +66,7 @@ export default function ShoppingItem(props) {
       display="flex"
     >
         <DragIndicatorIcon />
-        <TitleOrChoice id={item.id} title={item.title} price={price} productChoices={productChoices} onTitleSet={handleTitleSet} onSetPrice={handlePriced} />
+        <TitleOrChoice id={item.id} title={item.title} price={price} productChoices={productChoices} onTitleSet={handleTitleSet} onOptionChosen={handleOptionChosen} />
         <IconButton aria-label="bought" onClick={handleClickBought} style={{padding: "0 6px"}}>
           {item.bought === 0 ? <RadioButtonUncheckedIcon /> : <CheckCircleIcon /> }
         </IconButton>

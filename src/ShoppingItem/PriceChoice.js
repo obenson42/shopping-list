@@ -5,22 +5,30 @@ import FormControl from '@material-ui/core/FormControl';
 import Select from '@material-ui/core/Select';
 
 const useStyles = makeStyles((theme) => ({
+  choices: {
+    minWidth: "100%",
+    display: "flex",
+} ,
   formControl: {
     margin: theme.spacing(0),
     minWidth: 120,
+    width: "100%",
   },
   selectEmpty: {
     marginTop: theme.spacing(0),
   },
   choice: {
     display: "flex",
-    flexDirection: "column",
+    alignContent: "stretch",
     alignItems: "flex-start",
-    //fontSize: "0.8rem",
+    justifyContent: "space-between",
+  },
+  choiceTitle: {
+    flexGrow: 9,
   },
   choicePrice: {
-    display: "inline",
-    //alignSelf: "flex-end",
+    flexGrow: 1,
+    textAlign: "right",
   },
   price: {
     
@@ -35,7 +43,7 @@ export default function PriceChoice(props) {
   };
 
   return (
-    <div className={classes.price}>
+    <div className={classes.choices}>
       <FormControl className={classes.formControl}>
         <Select
           id={"item-" + 0}
@@ -49,7 +57,7 @@ export default function PriceChoice(props) {
           </MenuItem>
           {props.choices.map((item, index) => (
             <MenuItem key={"PriceChoice-" + item.id} value={item.id} className={classes.choice}>
-              {item.title}
+              <div className={classes.choiceTitle}>{item.title}</div>
               <div className={classes.choicePrice}>{"£" + item.price.toFixed(2)}</div>
             </MenuItem>
           ))}

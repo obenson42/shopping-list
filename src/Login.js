@@ -13,14 +13,29 @@ const useStyles = makeStyles((theme) => ({
       width: '100%',
     },
   },
+  error: {
+    fontWeight: "bold",
+    color: "red",
+    width: "100%",
+    textAlign: "center",
+  },
 }));
+
+function LoginFailMessage() {
+  const classes = useStyles();
+
+  return(
+    <div className={classes.error}>Unknown username or password</div>
+  );
+}
 
 export default function Login() {
   const classes = useStyles();
   const { userHasAuthenticated } = useAppContext();
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
-  const [showRegister, setShowRegister] = React.useState(false);
+  const [showRegister, setShowRegister] = useState(false);
+  const [loginFailed, setLoginFailed] = useState(false);
 
   function validateForm() {
     return username.length > 0 && password.length > 0;
@@ -32,7 +47,15 @@ export default function Login() {
         global.apiClient.accessToken = data['api_key'];
         global.apiClient.username = username;
         userHasAuthenticated(true);
-    });
+    })
+    .catch(error => {
+      if (error.response) {
+        //console.log(error.response.data);
+        //console.log(error.response.status);
+        //console.log(error.response.headers);
+      }
+      setLoginFailed(true);
+    })
   }
 
   const onClickRegister = () => setShowRegister(true)
@@ -41,6 +64,7 @@ export default function Login() {
     <>
       { showRegister ? <Register /> : 
       <div className="Login">
+          {loginFailed ? <LoginFailMessage />: ""}
         <form className={classes.root} onSubmit={handleSubmit}>
           <TextField
             autoFocus

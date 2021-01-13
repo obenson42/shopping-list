@@ -7,7 +7,7 @@ const prod = {
 
 const dev = {
     url: {
-        BASE_URI: 'http://localhost:5000'
+        BASE_URI: 'http://localhost:5000/'
     }
 };
 

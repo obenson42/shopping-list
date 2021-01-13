@@ -9,6 +9,8 @@ const useStyles = makeStyles((theme) => ({
         display: "flex",
     },
     price: {
+        paddingLeft: "1rem",
+        paddingRight: "0.5rem",
         color: "black",
         fontWeight: "bold",
     },
@@ -66,7 +68,7 @@ export default function TitleOrChoice(props) {
                 setTitle(selectedItem["title"]);
                 setPrice(selectedItem["price"]);
                 setProductChoices([]);
-                props.onSetPrice(selectedItem["price"]);
+                props.onOptionChosen(selectedItem["title"], selectedItem["price"]);
                 break;
             }
         }
